@@ -86,7 +86,8 @@
                   card:
                     type: entities
                     entities:
-                      - input_boolean.announce_[endpoint]_kodi_mini
+                      ### Add Your Endpoints by entity_id here.
+                      - input_boolean.announce_[endpoint_id]
                 - type: conditional
                   conditions:
                     - entity: input_select.mrp_media_type
@@ -94,30 +95,31 @@
                   card:
                     type: entities
                     entities:
-                      - entity: input_boolean.mrp_[endpoint]_kodi_mini
+                      ### Copy/Paste from here to the gap-card and change [endpoint entity_id] to your endpoint(s`) entity ID.
+                      - entity: input_boolean.mrp_[endpoint entity_id]
                         type: custom:multiple-entity-row
                         name: Master Suite
                         toggle: true
                         state_color: false
                         entities:
-                          - entity: media_player.mrp_[endpoint]_kodi_mini
+                          - entity: media_player.mrp_[endpoint entity_id]
                             tap_action:
                               action: call-service
                               service: input_number.decrement
                               service_data:
-                                entity_id: input_number.mrp_[endpoint]_kodi_mini
+                                entity_id: input_number.mrp_[endpoint entity_id]
                             name: false
                             icon: mdi:minus
-                          - entity: input_number.mrp_[endpoint]_kodi_mini
+                          - entity: input_number.mrp_[endpoint entity_id]
                             name: Volume
                             tap_action:
                               action: none
-                          - entity: media_player.mrp_[endpoint]_kodi_mini
+                          - entity: media_player.mrp_[endpoint entity_id]
                             tap_action:
                               action: call-service
                               service: input_number.increment
                               service_data:
-                                entity_id: input_number.mrp_[endpoint]_kodi_mini
+                                entity_id: input_number.mrp_[endpoint entity_id]
                             name: false
                             icon: mdi:plus
                 - type: custom:gap-card
