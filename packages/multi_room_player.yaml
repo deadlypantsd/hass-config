@@ -1,0 +1,361 @@
+#######################################################################################################################
+## Variables - Multi-Room Player
+#######################################################################################################################
+var:
+  mrp_playing:
+    initial_value: "false"
+    attributes:
+      friendly_name: "[Multiroom Player] Playing"
+    restore: false
+
+#######################################################################################################################
+## Sensor - Multi-Room Player
+#######################################################################################################################
+sensor:
+  - platform: template
+    sensors:
+      mrp_state:
+        friendly_name: "[Multiroom Player] State"
+        unique_id: mrp_state
+        icon_template: >-
+          {% if is_state('media_player.mrp_helper','playing') %} 
+            {{ 'mdi:play' }}
+          {% elif is_state('media_player.mrp_helper','on') %} 
+            {{ 'mdi:play' }}
+          {% elif is_state('media_player.mrp_helper','paused') %} 
+            {{ 'mdi:pause' }}
+          {% elif is_state('media_player.mrp_helper','idle') %} 
+            {{ 'mdi:stop' }}
+          {% endif %}
+        value_template: >
+          {{ states('media_player.mrp_helper') }}
+  - platform: template
+    sensors:
+      mrp_mediadisplay:
+        friendly_name: "[Multiroom Player] Media Display"
+        unique_id: mrp_mediadisplay
+        value_template: >
+          {% set helper=namespace(list=[]) %}{% for entity in (state_attr('media_player.mrp_helper','entity_id')) %}
+          {% set helper.list=helper.list+[entity|replace('media_player.mrp_','input_boolean.mrp_')|replace('_kodi_mini','')] %}{%endfor%}
+          {% set turned_on=expand(helper.list, 'media_player.mrp_helper')|map(attribute='entity_id') | map('replace', 'media_player.', 'input_boolean.') | list %}
+          {% set media=state_attr(expand(turned_on) | selectattr('state', 'eq', 'on')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default | replace('input_boolean','media_player'),'media_title') %}
+          {% set mediainfo=state_attr(expand(turned_on) | selectattr('state', 'eq', 'on')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default | replace('input_boolean','media_player'),'media_artist') %}
+          {% if not media %} Not Playing {% else %}{{mediainfo +" | "+ media}}{%endif%}
+
+#######################################################################################################################
+## Input Select - Multi-Room Player
+#######################################################################################################################
+input_select:
+  mrp_media_type:
+    name: Media Type
+    icon: mdi:file-music
+    options:
+      - Announcement
+      - Radio
+  mrp_media_radio:
+    name: Radio Station
+    icon: mdi:radio-tower
+    options: !include ../include/media/stations.yaml
+
+  mrp_media_announce:
+    name: Announcement
+    icon: mdi:message-alert-outline
+    options: !include ../include/media/mrp_announcements.yaml
+
+#######################################################################################################################
+## Input Text - Multi-Room Player
+#######################################################################################################################
+input_text:
+  mrp_announcement:
+    name: Announcement
+    icon: mdi:text
+
+script:
+  #######################################################################################################################
+  ## Play Media Script - Multi-Room Player
+  #######################################################################################################################
+  mrp_play:
+    alias: "[Multiroom Player] Play Media"
+    description: "Play Media to selected Media Players in Helper"
+    icon: mdi:speaker-play
+    mode: restart
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_select.mrp_media_type
+                state: Announcement
+            sequence:
+              - service: script.mrp_announce
+                data: {}
+              - stop: ""
+      - condition: template
+        value_template: >-
+          {% set f = namespace(value=0) %}
+          {% for entity in (state_attr('media_player.mrp_helper','entity_id'))%} {%
+          if is_state(('input_boolean.' ~ entity.split('.')[1]),'on') %} 
+          {% set f.value = 1 %}
+          {% endif %} {% endfor %}
+          {{ f.value|int > 0}}
+      - service: media_player.play_media
+        data:
+          media_content_id: !include ../include/media/mrp_template.yaml
+          media_content_type: audio/mpeg
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace', 'media_player.', 'input_boolean.') | select('is_state', 'on') | map('replace', 'input_boolean.', 'media_player.') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - service: var.set
+        data:
+          entity_id: var.mrp_playing
+          value: "true"
+  #######################################################################################################################
+  ## Re-Sync Media Script - Multi-Room Player
+  #######################################################################################################################
+  mrp_resync:
+    alias: "[Multiroom Player] Resync Media Players"
+    description: "Resync audio to selected Media Players in Helper"
+    icon: mdi:sync
+    mode: restart
+    sequence:
+      - condition: template
+        value_template: >-
+          {% set f = namespace(value=0) %}
+          {% for entity in (state_attr('media_player.mrp_helper','entity_id'))%} {%
+          if is_state(('input_boolean.' ~ entity.split('.')[1]),'on') %} 
+          {% set f.value = 1 %}
+          {% endif %} {% endfor %}
+          {{ f.value|int > 0}}
+      - service: media_player.media_stop
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace', 'media_player.', 'input_boolean.') | select('is_state', 'on') | map('replace', 'input_boolean.', 'media_player.') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - delay:
+          seconds: 2
+      - service: media_player.play_media
+        data:
+          media_content_id: !include ../include/media/mrp_template.yaml
+          media_content_type: audio/mpeg
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace', 'media_player.', 'input_boolean.') | select('is_state', 'on') | map('replace', 'input_boolean.', 'media_player.') | list %}
+            {{ mp | select('in', bool_on) | list }}
+
+  #######################################################################################################################
+  ## Stop Media Script - Multi-Room Player
+  #######################################################################################################################
+  mrp_stop:
+    alias: "[Multiroom Player] Stop Playback"
+    description: "[Multiroom Player] Stop playback on selected Media Players in helper"
+    icon: mdi:speaker-stop
+    mode: single
+    sequence:
+      - condition: template
+        value_template: >-
+          {% set f = namespace(value=0) %}
+          {% for entity in (state_attr('media_player.mrp_helper','entity_id'))%} {%
+          if is_state(('input_boolean.' ~ entity.split('.')[1]),'on') %} 
+          {% set f.value = 1 %}
+          {% endif %} {% endfor %}
+          {{ f.value|int > 0}}
+      - service: media_player.media_stop
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace', 'media_player.', 'input_boolean.') | select('is_state', 'on') | map('replace', 'input_boolean.', 'media_player.') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - service: var.set
+        data:
+          entity_id: var.mrp_playing
+          value: "false"
+
+  #######################################################################################################################
+  ## Announcement Script - Multi-Room Player
+  ##
+  ##  TODO: Pause / Resume if variable mrp_playing is true
+  ##
+  #######################################################################################################################
+  mrp_announce:
+    alias: "[Multiroom Player] Announcement"
+    icon: mdi:speaker-message
+    mode: single
+    sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.18
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace','media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | map('replace','input_boolean.announce_', 'media_player.mrp_') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - service: media_player.play_media
+        data:
+          media_content_id: /local/sound/mrp_chime.mp3
+          media_content_type: audio/mpeg
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace','media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | map('replace','input_boolean.announce_', 'media_player.mrp_') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 500
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.23
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace','media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | map('replace','input_boolean.announce_', 'media_player.mrp_') | list %}
+            {{ mp | select('in', bool_on) | list }}
+      - if:
+          - condition: template
+            value_template: "{{ mrp_announcement_text is defined }}"
+        then:
+          - service: tts.speak
+            data:
+              cache: false
+              media_player_entity_id: >
+                {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+                {% set bool_on = mp | map('replace','media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | map('replace','input_boolean.announce_', 'media_player.mrp_') | list %}
+                {{ mp | select('in', bool_on) | list }}
+              message: "{{ mrp_announcement_text }}"
+            target:
+              entity_id: tts.google_en_com
+        else:
+          - service: tts.speak
+            data:
+              cache: false
+              media_player_entity_id: >
+                {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+                {% set bool_on = mp | map('replace', 'media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | map('replace', 'input_boolean.announce_', 'media_player.mrp_') | list %}
+                {{ mp | select('in', bool_on) | list }}
+              message: !include ../include/media/mrp_template.yaml
+            target:
+              entity_id: tts.google_en_com
+      - service: input_boolean.turn_off
+        target:
+          entity_id: >-
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace','media_player.mrp_', 'input_boolean.announce_') | select('is_state', 'on') | list %}
+            {{ bool_on | list }}
+      - service: input_select.select_option
+        data:
+          option: Radio
+        target:
+          entity_id: input_select.mrp_media_type
+
+automation:
+  #######################################################################################################################
+  ## Input Boolean Automations - Multi-Room Player
+  ##
+  ## TODO: Dynamic entity_id entries
+  #######################################################################################################################
+
+  - id: mrp_endpoint_control
+    alias: "[Multiroom Player] Detect turn on/off from input_boolean"
+    description: Dectect input_boolean on/off for MRP entities
+    mode: single
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: template
+        value_template: >
+          {% if 'input_boolean.mrp_' in trigger.event.data.entity_id and '_kodi_mini' in trigger.event.data.entity_id %}true{% endif %}
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ states(trigger.event.data.entity_id) == 'on' }}"
+            sequence:
+              - condition: state
+                entity_id: var.mrp_playing
+                state: "true"
+              - service: media_player.play_media
+                data:
+                  media_content_id: !include ../include/media/mrp_template.yaml
+                  media_content_type: audio/mpeg
+                target:
+                  entity_id: >-
+                    {{[ trigger.event.data.entity_id | replace('input_boolean.', 'media_player.')] }}
+
+          - conditions:
+              - condition: template
+                value_template: "{{ states(trigger.event.data.entity_id) == 'off' }}"
+            sequence:
+              - service: media_player.media_stop
+                target:
+                  entity_id: >-
+                    {{ [trigger.event.data.entity_id | replace('input_boolean.','media_player.')] }}
+              - condition: template
+                value_template: >-
+                  {% set f = namespace(value=0) %}
+                  {% for entity in (state_attr('media_player.mrp_helper','entity_id'))%}
+                  {% if is_state(('input_boolean.' ~ entity.split('.')[1]),'on') %} 
+                  {% set f.value = 1 %}
+                  {% endif %} {% endfor %}
+                  {{ f.value|int == 0}}
+              - service: var.set
+                data:
+                  entity_id: var.mrp_playing
+                  value: "false"
+
+  #######################################################################################################################
+  ## Input Number Automations - Multi-Room Player
+  ##
+  ## TODO: Dynamic entity_id entries
+  #######################################################################################################################
+
+  - id: mrp_volume_control
+    alias: "[Multiroom Player] Adjust volume with input_number"
+    description: Adjust Volume for entity with input_number entities
+    mode: single
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: template
+        value_template: >
+          {% if 'input_number.mrp_' in trigger.event.data.entity_id and '_kodi_mini' in trigger.event.data.entity_id %}true{% endif %}
+    action:
+      - service: media_player.volume_set
+        data:
+          volume_level: >
+            {{ (states(trigger.event.data.entity_id)|int / 100 )|float }}
+        target:
+          entity_id: >-
+            {{ [trigger.event.data.entity_id | replace('input_number.','media_player.')] }}
+
+  #######################################################################################################################
+  ## Input Select Automations - Multi-Room Player
+  #######################################################################################################################
+
+  - id: mrp_change_station
+    alias: "[Multiroom Player] Change Station"
+    description: Change playing station with input_select entity
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - input_select.mrp_media_radio
+    condition:
+      - condition: state
+        entity_id: var.mrp_playing
+        state: "true"
+    action:
+      - service: media_player.play_media
+        data:
+          media_content_id: !include ../include/media/mrp_template.yaml
+          media_content_type: audio/mpeg
+        target:
+          entity_id: >
+            {% set mp = state_attr('media_player.mrp_helper','entity_id') %}
+            {% set bool_on = mp | map('replace', 'media_player.', 'input_boolean.') | select('is_state', 'on') | map('replace', 'input_boolean.', 'media_player.') | list %}
+            {{ mp | select('in', bool_on) | list }}
