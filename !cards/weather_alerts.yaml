@@ -1,0 +1,75 @@
+#################################################
+#                                               #
+#              LOCAL WEATHER ALERTS             #
+#                                               #
+#################################################
+
+- type: custom:button-card
+  width: 100%
+  name: >
+    <ha-icon icon="mdi:alert-box-outline"></ha-icon> Local Weather Alerts
+  tap_action:
+    action: fire-dom-event
+    browser_mod:
+      service: browser_mod.popup
+      data:
+        title: Local Weather Alerts
+        card_mod:
+          style: |
+            #popup header
+            .:
+        content:
+          type: custom:auto-entities
+          card:
+            type: custom:layout-card
+            show_header_toggle: true
+          filter:
+            template: |
+              {% set ns2 = namespace(cards=[]) %}
+              {% for event in state_attr('sensor.[HACS weatheralerts integration]','alerts') %}
+              {% set ns2.cards = ns2.cards + [{
+                "type": "markdown",
+                "title": event.event,
+                "content": event.description
+                }] 
+                %}
+              {% endfor %}
+              {%- set ns = namespace(results = [{
+                "type": "custom:swipe-card",
+                "parameters": {
+                  "pagination": {
+                    "type": "bullets"
+                  },
+                  "effect":"coverflow",
+                  "centeredSlides": "true",
+                  "slidesPerView": "auto",
+                  "coverflowEffect": {
+                    "rotate":"50",
+                    "stretch":"0",
+                    "depth":"100",
+                    "modifier":"1",
+                    "slideShadows":"true"
+                  }
+                },
+                "cards": ns2.cards
+                }])
+              -%}
+              {{ns.results}}
+
+  styles:
+    card:
+      - background: rgba(115, 115, 115, 0.10);
+
+  triggers_update:
+    - sensor.dorchester
+  variables:
+    notify: >
+      [[[
+        let id = this._config.triggers_update;
+        if (id.every(e => states[e]))
+            return states[id[0]].state === 'on'
+                ? 1
+                : parseFloat(states[id[0]].state) >= 1;
+      ]]]
+  template:
+    - footer_button
