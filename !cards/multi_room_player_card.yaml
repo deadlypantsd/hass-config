@@ -15,8 +15,7 @@
       }
     ]]]
   aspect_ratio: 2
-  template:
-    - footer_button
+  show_icon: false
   styles:
     card:
       - background-image: >
