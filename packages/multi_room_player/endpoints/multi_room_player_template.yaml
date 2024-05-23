@@ -1,0 +1,24 @@
+#######################################################################################################################
+## Input Boolean
+#######################################################################################################################
+input_boolean:
+  # Multi-Room Player
+  mrp_[endpoint]_kodi_mini:
+    name: "[Multi-Room Player] [Endpoint Name]"
+    icon: mdi:speaker
+  announce_[endpoint]_kodi_mini:
+    name: "[Announcements] [Endpoint Name]"
+    icon: mdi:speaker-message
+
+#######################################################################################################################
+## Input Number
+#######################################################################################################################
+input_number:
+  # Multi-Room Player
+  mrp_[endpoint]_kodi_mini:
+    name: "[Multi-Room Player] [Endpoint Name] - Volume"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
