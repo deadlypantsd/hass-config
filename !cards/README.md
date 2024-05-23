@@ -10,7 +10,7 @@ Shoot me a comment if you need help, and I'll do my best to get you up and going
 > ```sh
 > cvlc -I telnet --telnet-password=<mysecret> &
 > ``` 
-  ***By default, the vlc telnet plugin runs on port tcp/4212. \
+  ***By default, the vlc telnet plugin runs on port tcp/4212. You can change it with the `--telnet-port=<portnumber>` flag.\
   
   To use this card, configure the system like this:
   - Add your endpoint(s) via the VLC Telnet integration from **Settings -> Devices & Services -> + Add Integration**. Specify the IP/Host, secret, and port (4213).
