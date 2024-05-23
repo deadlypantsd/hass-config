@@ -1,0 +1,13 @@
+>-
+  {% if is_state('input_select.mrp_media_type','Announcement') %}
+    {% if is_state('input_select.mrp_media_announce','[Announcement List Item]') %} {{ '[Text to announce]' }}
+    {% elif is_state('input_select.mrp_media_announce','[Announcement List Item]') %} {{ '[Text to announce]' }}
+    {% endif %}
+
+  {% elif is_state('input_select.mrp_media_type','Radio') %}
+
+    {% if is_state('input_select.mrp_media_radio','[Radio List Item') %} {{ '[stream URL]' }}
+    {% elif is_state('input_select.mrp_media_radio','[Radio List Item]') %} {{ 'stream URL' }} 
+
+    {% endif %}
+  {% endif %}
