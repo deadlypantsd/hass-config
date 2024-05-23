@@ -1,0 +1,18 @@
+    - unique_id: sidebar
+      state: template
+      attributes:
+        time: >
+          {% set hours = now().strftime('%H') %}
+          {% set minutes = now().strftime('%M') %}
+          {% set time = states('sensor.time') %}
+          {% set hour = time[:2]|int %}
+          <span class="time">
+            {{ '{:01d}:{}'.format(hour if hour == 12 else hour % 12, time[3:5], 'p' if hour>11 else 'a') }}
+          </span>
+        date: >
+          {% if strptime(states('sensor.date'), '%Y-%m-%d').day != null %}
+          {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+          {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+            <b>{{ days[now().weekday()] }}</b><br>
+            {{ months[now().month-1] }} {{ strptime(states('sensor.date'), '%Y-%m-%d').day }}, {{ strptime(states('sensor.date'), '%Y-%m-%d').year }}
+          {% endif %}
