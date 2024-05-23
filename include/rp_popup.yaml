@@ -1,0 +1,20 @@
+type: grid
+columns: 10
+square: false
+cards:
+  - type: custom:button-card
+    aspect_ratio: 1/1
+    icon: mdi:none
+    styles:
+      card:
+        - background: >-
+            url("/local/img/cards/radio_player/stations/[List Item].png");
+        - background-size: cover
+    tap_action:
+      action: call-service
+      service: input_select.select_option
+      service_data:
+        option: [List Item]
+      target:
+        entity_id: >
+          [[[ return `input_select.rp_${variables.radio}_radio`; ]]]
