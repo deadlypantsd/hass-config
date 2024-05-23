@@ -1,0 +1,4 @@
+>-
+  {% if is_state('input_select.rp_'~rp_radio~'_radio','[List Item]') %} {{ '[stream URL]' }} 
+  {% elif is_state('input_select.rp_'~rp_radio~'_radio','[List Item]') %} {{ '[stream URL]' }} 
+  {% endif %}
