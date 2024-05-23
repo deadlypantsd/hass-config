@@ -1,0 +1,261 @@
+#######################################################################################################################
+## Template Sensors - Radio Player
+#######################################################################################################################
+template:
+  - sensor:
+      - name: rp_on
+        state: >
+          {% set helper=namespace(list=[]) %}{% for entity in (state_attr('media_player.rp_helper','entity_id')) %}
+          {% set helper.list=helper.list+[entity|replace('media_player.vlc_','input_boolean.rp_')|replace('_kodi_mini','')] %}{%endfor%}
+          {% set turned_on=expand(helper.list, 'media_player.rp_helper')|map(attribute='entity_id') | map('replace', 'media_player.', 'input_boolean.') | list %}
+          {{ expand(turned_on) | selectattr('state', 'eq', 'on')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default }}
+      - name: rp_off
+        state: >
+          {% set helper=namespace(list=[]) %}
+          {% for entity in (state_attr('media_player.rp_helper','entity_id')) %}
+          {% set helper.list=helper.list+[entity|replace('media_player.vlc_','input_boolean.rp_')|replace('_kodi_mini','')] %}
+          {%endfor%}
+          {% set turned_off=expand(helper.list, 'media_player.rp_helper')|map(attribute='entity_id') | map('replace', 'media_player.', 'input_boolean.') | list %}
+          {{ expand(turned_off) | selectattr('state', 'eq', 'off')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default }}
+
+script:
+  #######################################################################################################################
+  ## Play Media - Radio Player
+  #######################################################################################################################
+  rp_on:
+    alias: "[Radio Player] Play Media"
+    description: "[Radio Player] Play Media on Media Player"
+    icon: mdi:speaker-play
+    mode: parallel
+    sequence:
+      - service: media_player.volume_set
+        data:
+          volume_level: >-
+            {{ states('input_number.rp_' ~ rp_radio ~ '_volume')|int / 100|float }}
+        target:
+          entity_id: >
+            {{ ['media_player.vlc_' ~ rp_radio ~ '_kodi_mini'] }}
+      - service: media_player.play_media
+        data:
+          media_content_id: !include /config/include/media/rp_template.yaml
+          media_content_type: audio/mpeg
+        target:
+          entity_id: >
+            {{ ['media_player.vlc_' ~ rp_radio ~ '_kodi_mini'] }}
+      - service: var.set
+        data:
+          entity_id: >
+            {{ 'var.rp_'~rp_radio~'_playing' }}
+          value: "on"
+
+  #######################################################################################################################
+  ## Stop Media - Radio Player
+  #######################################################################################################################
+  rp_off:
+    alias: "[Radio Player] Stop Playback"
+    description: "[Radio Player] Stop Media on Media Player"
+    icon: mdi:speaker-stop
+    mode: single
+    sequence:
+      - choose:
+          - conditions:
+              - condition: and
+                conditions:
+                  - condition: template
+                    value_template: "{{ states('var.rp_' ~ rp_radio ~'_playing') == 'on' }}"
+                  - condition: template
+                    value_template: "{{ states('media_player.vlc_' ~ rp_radio ~'_kodi_mini') == 'playing' }}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: >
+                    {{ 'input_boolean.rp_'~rp_radio~'_sleep' }}
+              - service: timer.cancel
+                target:
+                  entity_id: >
+                    {{ 'timer.rp_'~rp_radio~'_sleep' }}
+              - service: media_player.media_stop
+                target:
+                  entity_id: >
+                    {{ ['media_player.vlc_' ~ rp_radio ~ '_kodi_mini'] }}
+              - service: var.set
+                data:
+                  entity_id: >
+                    {{ 'var.rp_'~rp_radio~'_playing' }}
+                  value: "off"
+
+automation:
+  #######################################################################################################################
+  ## Input Boolean - Radio Player
+  #######################################################################################################################
+  - id: rp_endpoint_on
+    alias: "[Radio Player] Detect Turn On"
+    description: "[Radio Player] Dectect input_boolean 'on' for Radio Player entities"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.rp_on
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.rp_on
+        data:
+          variables:
+            rp_radio: >
+              {{ trigger.to_state.state | replace('input_boolean.rp_','') }}
+
+  - id: rp_endpoint_off
+    alias: "[Radio Player] Detect Turn Off"
+    description: "[Radio Player] Dectect input_boolean 'off' for Radio Player entities"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.rp_off
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.rp_off
+        data:
+          variables:
+            rp_radio: >
+              {{ trigger.to_state.state | replace('input_boolean.rp_','') }}
+
+  - id: rp_sleep_on
+    alias: "[Radio Player] Detect Sleep On"
+    description: "[Radio Player] Detect input_boolean 'sleep' on for Radio Player entities"
+    mode: single
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: >
+              {% if 'input_boolean.rp_' in trigger.event.data.entity_id and '_sleep' in trigger.event.data.entity_id %}true{% endif %}
+          - condition: template
+            value_template: >-
+              {{ states(trigger.event.data.entity_id) == 'on' }}
+    action:
+      - service: var.set
+        data:
+          entity_id: >
+            {{ 'var.rp_'~trigger.event.data.entity_id | replace('input_boolean.rp_','') | replace('_sleep','')~'_playing' }}
+          value: "on"
+
+      - service: script.turn_on
+        target:
+          entity_id: script.rp_on
+        data:
+          variables:
+            rp_radio: "{{ trigger.event.data.entity_id | replace('input_boolean.rp_','') | replace('_sleep','') }}"
+      - service: timer.start
+        data:
+          duration:
+            hours: 3
+        target:
+          entity_id: "{{ trigger.event.data.entity_id | replace('input_boolean.rp_','timer.rp_') }}"
+
+  - id: rp_sleep_off
+    alias: "[Radio Player] Detect Sleep Off"
+    description: "[Radio Player] Detect input_boolean 'sleep' off for Radio Player entities"
+    mode: single
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: >
+              {% if 'input_boolean.rp_' in trigger.event.data.entity_id and '_sleep' in trigger.event.data.entity_id %}true{% endif %}
+          - condition: template
+            value_template: >-
+              {{ states(trigger.event.data.entity_id) == 'off' }}
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.rp_off
+        data:
+          variables:
+            rp_radio: "{{ trigger.event.data.entity_id | replace('input_boolean.rp_','') | replace('_sleep','') }}"
+
+  #######################################################################################################################
+  ## Input Number - Radio Player
+  #######################################################################################################################
+  - id: rp_volume
+    alias: "[Radio Player] Volume Control"
+    description: "[Radio Player] Change media_player volume with input_boolean"
+    mode: parallel
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: template
+        value_template: >
+          {% if 'input_number.rp_' in trigger.event.data.entity_id %}true{% endif %}
+
+    action:
+      - service: media_player.volume_set
+        target:
+          entity_id: >
+            {{[ trigger.event.data.entity_id | replace('input_number.rp_','media_player.vlc_') | replace('_volume','') ~ '_kodi_mini' ]}}
+        data:
+          volume_level: >
+            {{ trigger.event.data.new_state.state | int / 100 | float }}
+
+  #######################################################################################################################
+  ## Input Select - Radio Player
+  #######################################################################################################################
+  - id: rp_station
+    alias: "[Radio Player] Change Statiom"
+    description: "[Radio Player] Detect Radio Station change with input_select"
+    mode: parallel
+    trigger:
+      - platform: event
+        event_type: state_changed
+    condition:
+      - condition: template
+        value_template: >
+          {% if 'input_select.rp_' in trigger.event.data.entity_id and '_radio' in trigger.event.data.entity_id %}true{% endif %}
+
+    action:
+      - condition: template
+        value_template: "{{ states(trigger.event.data.entity_id | replace('input_select','input_boolean') | replace('_radio','')) == 'on' }}"
+
+      - service: script.turn_on
+        target:
+          entity_id: script.rp_on
+        data:
+          variables:
+            rp_radio: >
+              {{ trigger.event.data.entity_id | replace('input_select.rp_','') | replace('_radio','')}}
+
+  #######################################################################################################################
+  ## Timer - Radio Player Sleep
+  #######################################################################################################################
+  - id: rp_sleep_off_timer
+    alias: "[Radio Player] Sleep Timer Finished"
+    description: Turn off Radio Player for Sleep
+    mode: single
+    max_exceeded: silent
+
+    trigger:
+      - platform: event
+        event_type: timer.finished
+    condition:
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: >
+              {% if 'timer.rp_' in trigger.event.data.entity_id %}true{% endif %}
+          - condition: template
+            value_template: >-
+              {{ states('input_boolean' ~ trigger.event.data.entity_id | replace('timer','')) == 'on' }}
+    action:
+      - service: script.turn_on
+        data:
+          variables:
+            rp_radio: "{{ trigger.event.data.entity_id | replace('timer.rp_','') | replace('_sleep','') }}"
+        target:
+          entity_id: script.rp_off
