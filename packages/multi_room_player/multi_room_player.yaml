@@ -39,8 +39,7 @@ sensor:
           {% set helper.list=helper.list+[entity|replace('media_player.mrp_','input_boolean.mrp_')|replace('_kodi_mini','')] %}{%endfor%}
           {% set turned_on=expand(helper.list, 'media_player.mrp_helper')|map(attribute='entity_id') | map('replace', 'media_player.', 'input_boolean.') | list %}
           {% set media=state_attr(expand(turned_on) | selectattr('state', 'eq', 'on')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default | replace('input_boolean','media_player'),'media_title') %}
-          {% set mediainfo=state_attr(expand(turned_on) | selectattr('state', 'eq', 'on')|sort(attribute='last_updated', reverse=True)|map(attribute='entity_id')|first|default | replace('input_boolean','media_player'),'media_artist') %}
-          {% if not media %} Not Playing {% else %}{{mediainfo +" | "+ media}}{%endif%}
+          {% if not media %} Not Playing {% else %}{{media}}{%endif%}
 
 #######################################################################################################################
 ## Input Select - Multi-Room Player
