@@ -1,0 +1,8 @@
+- url: "/local/marked.min.js?v=4.3.0"
+  type: module
+- url: "/local/vanilla-tilt.min.js"
+  type: module
+- url: "/local/browser_mod_icon.js"
+  type: module
+- url: "/local/fonts.css?v=2.1"
+  type: css
