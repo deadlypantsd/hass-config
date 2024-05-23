@@ -1,0 +1,341 @@
+#################################################
+#                                               #
+#              COLOR/RGB LIGHTS                 #
+#                                               #
+#################################################
+
+rgb_light:
+  template:
+    - base
+    - circle
+    - loader
+  tap_action:
+    action: toggle
+    entity: >
+      [[[ return entity === undefined || entity.entity_id; ]]]
+  hold_action:
+    action: fire-dom-event
+    browser_mod:
+      service: browser_mod.popup
+      data:
+        title: >
+          [[[
+            return entity === undefined || entity.attributes.friendly_name;
+          ]]]
+        card_mod:
+          style:
+            #popup header
+            .:
+        content:
+          type: grid
+          square: false
+          columns: 1
+          cards:
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  card_mod:
+                    style: |
+                      #states {
+                        padding-top: 0.5em;
+                      }
+                  entities: >
+                    [[[
+                      if (entity) {
+                          let lights = [],
+                              id = Boolean(entity.attributes.entity_id)
+                                  ? [entity.entity_id].concat(entity.attributes.entity_id)
+                                  : [entity.entity_id];
+                              lights.push({
+                                  "type": "custom:mushroom-light-card",
+                                  "entity": id[0],
+                                  "fill_container": true,
+                                  "primary_info": "none",
+                                  "secondary_info": "none",
+                                  "icon_type": "none",
+                                  "show_brightness_control": true,
+                                  "collapsible_controls": false,
+
+
+                        });
+                        return lights;
+                    }
+                    ]]]
+            - type: horizontal-stack
+              cards:
+                - show_name: false
+                  icon: mdi:lightbulb-off
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_off
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                - show_name: false
+                  icon: mdi:lightbulb-on-20
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      brightness: 64
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                - show_name: false
+                  icon: mdi:lightbulb-on-40
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      brightness: 128
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                - show_name: false
+                  icon: mdi:lightbulb-on-80
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      brightness: 192
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                - show_name: false
+                  icon: mdi:lightbulb-on
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      brightness: 255
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+
+            - type: horizontal-stack
+              cards:
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: rgb(255,254,250);
+                        }
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      kelvin: 6535
+                      transition: 5
+                    target:
+                      entity_id: "[[[ if (entity) { return entity.entity_id; } ]]]"
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  type: custom:button-card
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: rgb(255, 224, 199);
+                        }
+
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      kelvin: 4830
+                      transition: 5
+                    target:
+                      entity_id: "[[[ if (entity) { return entity.entity_id; } ]]]"
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  type: custom:button-card
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: rgb(255, 201, 158);
+                        }
+
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      kelvin: 3830
+                      transition: 5
+                    target:
+                      entity_id: "[[[ if (entity) { return entity.entity_id; } ]]]"
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  type: custom:button-card
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: rgb(255, 182, 121);
+                        }
+
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      kelvin: 3174
+                      transition: 5
+                    target:
+                      entity_id: "[[[ if (entity) { return entity.entity_id; } ]]]"
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  type: custom:button-card
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: rgb(255, 166, 87);
+                        }
+
+                  tap_action:
+                    action: call-service
+                    service: light.turn_on
+                    data:
+                      kelvin: 2700
+                      transition: 5
+                    target:
+                      entity_id: "[[[ if (entity) { return entity.entity_id; } ]]]"
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+
+                - show_name: false
+                  icon: mdi:circle
+                  show_icon: true
+                  type: custom:button-card
+                  card_mod:
+                    style: |
+                      :host {
+                        --card-mod-icon-color: #ff0000;
+                        }
+                  extra_styles: |
+                    @keyframes icon_color1 {
+                        from {
+                          filter: hue-rotate(0deg);
+                        }
+                        to {
+                          filter: hue-rotate(360deg);
+                        }
+
+                    }
+
+                  tap_action:
+                    action: fire-dom-event
+                    browser_mod:
+                      service: browser_mod.popup
+                      data:
+                        title: >
+                          [[[
+                            return entity === undefined || entity.attributes.friendly_name;
+                          ]]]
+                        card_mod:
+                          style:
+                            #popup header
+                            .:
+                        content:
+                          type: custom:light-entity-card
+                          entity: |
+                            [[[ if (entity) { return entity.entity_id; } ]]]
+                          consolidate_entities: true
+                          hide_header: true
+                          color_wheel: true
+                          brightness: false
+                          color_temp: false
+                          white_value: false
+                          color_picker: true
+                          effects_list: false
+
+                  styles:
+                    icon:
+                      - color: "#ff0000"
+                      - animation: 4s linear infinite icon_color1
+                  entity: "[[[ if (entity) { return entity.entity_id; } ]]]"
+  variables:
+    circle_input: >
+      [[[
+        if (entity) {
+            // if light group get brightness from child to remove bounce
+            let child = entity.attributes.entity_id,
+                brightness = child && states[child[0]].attributes.brightness
+                    ? Math.round(states[child[0]].attributes.brightness / 2.54)
+                    : Math.round(entity.attributes.brightness / 2.54);
+            return brightness === 0 && entity.state !== 'off'
+                ? 1
+                : brightness
+        }
+      ]]]
+    circle_input_unit: "%"

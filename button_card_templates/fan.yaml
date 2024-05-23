@@ -1,0 +1,143 @@
+fan:
+  template:
+    - base
+    - loader
+  variables:
+    circle_input: >
+      [[[ return entity === undefined || Math.round(entity.attributes.percentage); ]]]
+  tap_action:
+    action: toggle
+    entity: >
+      [[[ return entity === undefined || entity.entity_id; ]]]
+  hold_action:
+    action: fire-dom-event
+    browser_mod:
+      service: browser_mod.popup
+      data:
+        # title:
+        # [[[ return entity === undefined || entity.attributes.friendly_name; ]]]
+        card_mod:
+          style:
+            #popup header
+            .:
+        content:
+          type: grid
+          square: false
+          columns: 1
+          cards:
+            - type: vertical-stack
+              cards:
+                - type: custom:mushroom-fan-card
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                  icon_animation: true
+                  layout: horizontal
+                  fill_container: true
+                  show_percentage_control: true
+                  show_oscillate_control: false
+                  collapsible_controls: false
+                  primary_info: state
+                  secondary_info: none
+                  icon: mdi:fan
+            - type: horizontal-stack
+              cards:
+                - show_name: false
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: fan.turn_off
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                    service_data: {}
+                  entity: >
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                  hold_action:
+                    action: none
+                  icon: mdi:fan-off
+                - show_name: false
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: fan.set_percentage
+                    service_data:
+                      "percentage": 33
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+
+                  entity: |
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                  hold_action:
+                    action: none
+                  icon: mdi:fan-speed-1
+                - show_name: false
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: fan.set_percentage
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                    data:
+                      percentage: 66
+                  entity: >
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                  hold_action:
+                    action: none
+                  icon: mdi:fan-speed-2
+                - show_name: false
+                  show_icon: true
+                  type: custom:button-card
+                  tap_action:
+                    action: call-service
+                    service: fan.set_percentage
+                    target:
+                      entity_id: |
+                        [[[
+                          if (entity) {
+                              return entity.entity_id;
+                          }
+                        ]]]
+                    data:
+                      percentage: 100
+                  entity: >
+                    [[[
+                      if (entity) {
+                          return entity.entity_id;
+                      }
+                    ]]]
+                  hold_action:
+                    action: none
+                  icon: mdi:fan-speed-3

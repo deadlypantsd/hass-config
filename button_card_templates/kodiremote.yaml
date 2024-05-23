@@ -1,0 +1,433 @@
+#################################################
+#                                               #
+#                    REMOTE                     #
+#                                               #
+#################################################
+
+remote:
+  template:
+    - base
+  tap_action:
+    action: fire-dom-event
+    browser_mod:
+      service: browser_mod.popup
+      data:
+        title: >
+          [[[
+            return entity === undefined || entity.attributes.friendly_name;
+          ]]]
+        card_mod:
+          style:
+            #popup header
+            .:
+        content:
+          type: grid
+          square: false
+          columns: 1
+          cards:
+            - type: grid
+              title:
+              square: false
+              view_layout:
+                grid-area: remote
+              columns: 1
+              cards:
+                - type: vertical-stack
+                  cards:
+                    - type: horizontal-stack
+                      cards:
+                        - type: conditional
+                          conditions:
+                            - entity: sensor.kodi_tv_is_volume_muted
+                              state: "false"
+                          card:
+                            type: custom:button-card
+                            icon: mdi:volume-off
+                            tap_action:
+                              action: call-service
+                              service: media_player.volume_mute
+                              service_data:
+                                is_volume_muted: true
+                              target:
+                                entity_id: |
+                                  [[[
+                                    if (entity) {
+                                        return entity.entity_id;
+                                    }
+                                  ]]]
+                            hold_action:
+                              action: none
+                            show_name: false
+                        - type: conditional
+                          conditions:
+                            - entity: sensor.kodi_tv_is_volume_muted
+                              state: "true"
+                          card:
+                            type: custom:button-card
+                            icon: mdi:volume-high
+                            tap_action:
+                              action: call-service
+                              service: media_player.volume_mute
+                              service_data:
+                                is_volume_muted: false
+                              target:
+                                entity_id: |
+                                  [[[
+                                    if (entity) {
+                                        return entity.entity_id;
+                                    }
+                                  ]]]
+                            hold_action:
+                              action: none
+                            show_name: false
+                        - type: custom:button-card
+                          icon: mdi:volume-minus
+                          tap_action:
+                            action: call-service
+                            service: media_player.volume_down
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:volume-plus
+                          tap_action:
+                            action: call-service
+                            service: media_player.volume_up
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          icon: mdi:subtitles-outline
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Player.SetSubtitle
+                              playerid: 1
+                              subtitle: next
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:stop
+                          tap_action:
+                            action: call-service
+                            service: media_player.media_stop
+                            service_data: {}
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                          show_icon: true
+                        - type: custom:button-card
+                          icon: mdi:play-pause
+                          tap_action:
+                            action: call-service
+                            service: media_player.media_play_pause
+                            service_data: {}
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:open-in-new
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: GUI.SetFullscreen
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          icon: mdi:skip-previous
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Player.Seek
+                              playerid: 1
+                              value: bigbackward
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:rewind
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Player.Seek
+                              playerid: 1
+                              value: smallbackward
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:fast-forward
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Player.Seek
+                              playerid: 1
+                              value: smallforward
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:skip-next
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Player.Seek
+                              playerid: 1
+                              value: bigforward
+                          hold_action:
+                            action: none
+                          show_name: false
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          icon: mdi:home
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Input.Home
+                          hold_action:
+                            action: none
+                          show_name: false
+                          icon_height: 40px
+                        - type: custom:button-card
+                          icon: mdi:chevron-up
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Input.Up
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:information-outline
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                            service_data:
+                              method: Input.Info
+                          hold_action:
+                            action: none
+                          show_name: false
+                          icon_height: 40px
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          icon: mdi:chevron-left
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.Left
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                        - type: custom:button-card
+                          icon: mdi:kodi
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.Select
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                          icon_height: 50px
+                        - type: custom:button-card
+                          icon: mdi:chevron-right
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.Right
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                    - type: horizontal-stack
+                      cards:
+                        - type: custom:button-card
+                          icon: mdi:subdirectory-arrow-left
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.Back
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                          icon_height: 40px
+                          entity: |
+                            [[[
+                              if (entity) {
+                                  return entity.entity_id;
+                              }
+                            ]]]
+                        - type: custom:button-card
+                          icon: mdi:chevron-down
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.Down
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                          show_icon: true
+                          show_state: false
+                        - type: custom:button-card
+                          icon: mdi:menu
+                          tap_action:
+                            action: call-service
+                            service: kodi.call_method
+                            service_data:
+                              method: Input.ContextMenu
+                            target:
+                              entity_id: |
+                                [[[
+                                  if (entity) {
+                                      return entity.entity_id;
+                                  }
+                                ]]]
+                          hold_action:
+                            action: none
+                          show_name: false
+                          icon_height: 40px

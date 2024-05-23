@@ -1,0 +1,98 @@
+footer_button:
+  template:
+    - extra_styles
+  variables:
+    state_on: >
+      [[[ return ['on', 'home', 'cool', 'fan_only', 'playing', 'unlocked'].indexOf(!entity || entity.state) !== -1; ]]]
+    state: >
+      [[[ return !entity || entity.state; ]]]
+    entity_id: >
+      [[[ return !entity || entity.entity_id; ]]]
+    entity_picture: >
+      [[[ return !entity || entity.attributes.entity_picture; ]]]
+    timeout: >
+      [[[ return !entity || Date.now() - Date.parse(entity.last_changed); ]]]
+    notify: >
+      [[[
+        return false;
+      ]]]
+    tilt_options: >
+      [[[
+        return {
+          max: 5,
+          scale: 1.1,
+          glare: true,
+          'max-glare': 0.07,
+          perspective: 1000,
+          speed: 800,
+          parallax: '10px'
+        };
+      ]]]
+  size: 2vw
+  width: 100%
+  show_icon: false
+  color: "#9da0a2"
+  custom_fields:
+    notify: >
+      [[[
+        if (Number.isInteger(variables.notify)) {
+            return variables.notify;
+        } else if (variables.notify) {
+            return `<span style="font-weight: 900;">!</span>`;
+        }
+      ]]]
+  styles:
+    card:
+      - color: "#97989c"
+      - border: 0.12vw solid rgba(115, 115, 115, 0.2)
+      - transition: none
+      - padding: 0 0 0.05vw 0
+      - overflow: visible
+      - --mdc-ripple-color: >
+          [[[
+            return variables.state_on
+                ? 'rgb(0, 0, 0)'
+                : '#97989c';
+          ]]]
+      - color: >
+          [[[
+            return variables.state_on
+                ? '#4b5254'
+                : '#97989c';
+          ]]]
+      - background-color: >
+          [[[
+            return variables.state_on
+                ? 'rgba(255, 255, 255, 0.85)'
+                : 'rgba(115, 115, 115, 0.25)';
+          ]]]
+    custom_fields:
+      notify:
+        - display: >
+            [[[
+              if (Number.isInteger(variables.notify)) {
+                  return variables.notify > 0
+                      ? 'initial'
+                      : 'none';
+              }
+              else if (variables.notify) {
+                  return variables.notify
+                      ? 'initial'
+                      : 'none';
+              }
+            ]]]
+        - position: absolute
+        - font-weight: 700
+        - color: "#d6d6d6"
+        - background: "#8b3333"
+        - border-radius: 50%
+        - text-align: center
+        - text-overflow: unset
+        - z-index: 1
+  tap_action:
+    action: toggle
+    haptic: medium
+  double_tap_action:
+    haptic: success
+  hold_action:
+    action: block
