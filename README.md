@@ -1,2 +1,1 @@
-# hass-config
-Home Assistant Configuration
+# Home Assistant Configuration
