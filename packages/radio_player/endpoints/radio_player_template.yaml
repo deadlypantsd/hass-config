@@ -22,7 +22,6 @@ sensor:
         unique_id: [endpoint]_mediadisplay
         value_template: >
           {% set media=state_attr('media_player.vlc_[endpoint]_kodi_mini', 'media_title') %}
-          {% set mediainfo=state_attr('media_player.vlc_[endpoint]_kodi_mini', 'media_artist') %}
           {% if not media %} Not Playing {% else %}{{media}}{%endif%}
 #######################################################################################################################
 ## Input Boolean
