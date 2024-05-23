@@ -1,0 +1,7 @@
+mode: yaml
+resources: !include resources.yaml
+dashboards:
+  ui-mastersuite:
+    mode: yaml
+    filename: dashboards/ui-lovelace.yaml
+    title: Home
