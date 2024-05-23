@@ -1,0 +1,47 @@
+button_card_templates: !include_dir_merge_named ../button_card_templates
+
+views:
+  - type: custom:grid-layout
+    title: Development
+    layout:
+      #default
+      margin: 0
+      grid-gap: 8px
+      grid-template-columns: repeat(12, 1fr) 0
+      grid-template-areas: |
+        "sidebar  sidebar  sidebar  .  .  .  .  .  .  .  .  ."
+        "sidebar  sidebar  sidebar  start .  .  .  .  .  .  .  ."
+        "sidebar  sidebar  sidebar  .  .  .  .  .  .  .  .  ."
+    cards:
+      #extra_styles fix, do not remove
+      - type: custom:button-card
+        styles: { card: [display: none] }
+
+      #################################################
+      #                                               #
+      #                    SIDEBAR                    #
+      #                                               #
+      #################################################
+
+      - type: vertical-stack
+        view_layout:
+          grid-area: sidebar
+        cards:
+          - type: custom:button-card
+            entity: sensor.template_sidebar
+            template: sidebar
+
+      #################################################
+      #                                               #
+      #                   START HERE                  #
+      #                                               #
+      #################################################
+      - type: custom:layout-card
+        layout_type: grid
+        view_layout:
+          grid-area: start
+        layout:
+          grid-template-rows: auto
+          grid-gap: 0.6em
+        cards:
+          - []
