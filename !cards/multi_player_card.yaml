@@ -1,0 +1,185 @@
+#################################################
+#                                               #
+#              MULTI ROOM PLAYER                #
+#                                               #
+#################################################
+
+- type: custom:button-card
+  entity: sensor.mrp_state
+  name: >
+    [[[
+      if (states['sensor.mrp_mediadisplay'].state !== "Not Playing") {
+        return `<div style='display: flex;display: -webkit-flex;'><marquee>${states['sensor.mrp_mediadisplay'].state}</marquee>`
+      } else { 
+        return `${states['sensor.mrp_mediadisplay'].state}`
+      }
+    ]]]
+  aspect_ratio: 2
+  template:
+    - footer_button
+  styles:
+    card:
+      - background-image: >
+          [[[
+            if (states['sensor.mrp_mediadisplay'].state !== "Not Playing") {
+              return`url("/local/img/cards/multiroom_player/multiroom_player.jpg")`
+            } else {
+              return`url("/local/img/cards/multiroom_player/multiroom_player_off.jpg")`
+            }
+            ]]]
+      - background-size: 100% 100%
+    grid:
+      - grid-template-areas: |
+          "i  ."
+          "n     n"
+      - grid-template-columns: repeat(2, 1fr)
+      - grid-template-rows: auto repeat(2, min-content)
+      - gap: 0.1%
+      - align-items: start
+      - will-change: transform
+    name:
+      - color: white
+      - font-size: var(--footer-card-font-size)
+      - justify-self: start
+      - line-height: 121%
+    state:
+      - justify-self: start
+      - line-height: 115%
+      - color: white
+      - font-size: var(--footer-card-font-size)
+  tap_action:
+    action: fire-dom-event
+    browser_mod:
+      service: browser_mod.popup
+      data:
+        title: Multi-Room Player Settings
+        card_mod:
+          style: |
+            #popup header
+            .:
+        content:
+          type: grid
+          square: false
+          columns: 1
+          cards:
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  entities:
+                    - entity: input_select.mrp_media_type
+                    - type: conditional
+                      conditions:
+                        - entity: input_select.mrp_media_type
+                          state: Announcement
+                      row:
+                        entity: input_select.mrp_media_announce
+                    - type: conditional
+                      conditions:
+                        - entity: input_select.mrp_media_type
+                          state: Radio
+                      row:
+                        entity: input_select.mrp_media_radio
+                - type: custom:gap-card
+                - type: conditional
+                  conditions:
+                    - entity: input_select.mrp_media_type
+                      state: Announcement
+                  card:
+                    type: entities
+                    entities:
+                      - input_boolean.announce_[endpoint]_kodi_mini
+                - type: conditional
+                  conditions:
+                    - entity: input_select.mrp_media_type
+                      state: Radio
+                  card:
+                    type: entities
+                    entities:
+                      - entity: input_boolean.mrp_[endpoint]_kodi_mini
+                        type: custom:multiple-entity-row
+                        name: Master Suite
+                        toggle: true
+                        state_color: false
+                        entities:
+                          - entity: media_player.mrp_[endpoint]_kodi_mini
+                            tap_action:
+                              action: call-service
+                              service: input_number.decrement
+                              service_data:
+                                entity_id: input_number.mrp_[endpoint]_kodi_mini
+                            name: false
+                            icon: mdi:minus
+                          - entity: input_number.mrp_[endpoint]_kodi_mini
+                            name: Volume
+                            tap_action:
+                              action: none
+                          - entity: media_player.mrp_[endpoint]_kodi_mini
+                            tap_action:
+                              action: call-service
+                              service: input_number.increment
+                              service_data:
+                                entity_id: input_number.mrp_[endpoint]_kodi_mini
+                            name: false
+                            icon: mdi:plus
+                - type: custom:gap-card
+                - type: grid
+                  square: false
+                  columns: 5
+                  cards:
+                    - type: custom:gap-card
+                    - type: custom:button-card
+                      show_name: true
+                      show_icon: true
+                      tap_action:
+                        action: call-service
+                        service: script.mrp_play
+                        target: {}
+                      entity: script.mrp_play
+                      name: Play
+                      icon: mdi:play
+                      hold_action:
+                        action: none
+                    - type: conditional
+                      conditions:
+                        - entity: input_select.mrp_media_type
+                          state: Radio
+                      card:
+                        type: grid
+                        square: false
+                        columns: 1
+                        cards:
+                          - type: custom:button-card
+                            show_name: true
+                            show_icon: true
+                            tap_action:
+                              action: call-service
+                              service: script.mrp_stop
+                              target: {}
+                            entity: script.mrp_stop
+                            icon: mdi:stop
+                            name: Stop
+                            hold_action:
+                              action: none
+                    - type: conditional
+                      conditions:
+                        - entity: input_select.mrp_media_type
+                          state: Radio
+                      card:
+                        type: grid
+                        square: false
+                        columns: 1
+                        cards:
+                          - type: custom:button-card
+                            show_name: true
+                            show_icon: true
+                            tap_action:
+                              action: call-service
+                              service: script.mrp_resync
+                              target: {}
+                            entity: script.mrp_stop
+                            icon: mdi:sync
+                            name: Re-Sync
+                            hold_action:
+                              action: none
+                    - type: custom:gap-card
+                - type: custom:gap-card
