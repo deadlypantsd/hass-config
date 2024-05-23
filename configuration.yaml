@@ -1,0 +1,47 @@
+homeassistant:
+  name: Home
+  latitude: [LAT]
+  longitude: [LONG]
+  elevation: {ELEVATION]
+  unit_system: us_customary
+  temperature_unit: F
+  language: en
+  country: US
+  currency: USD
+  time_zone: [TIMEZONE]
+  packages: !include_dir_named packages
+  customize_domain:
+    automation:
+      initial_state: true
+  allowlist_external_dirs:
+    - /config
+
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - <redacted>
+  server_port: 8123
+
+frontend:
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/card-mod.js
+  themes: !include_dir_merge_named themes
+
+template: !include sidebar.yaml
+
+lovelace: !include /config/ui/ui_config.yaml
+
+logger:
+  default: warning
+  logs:
+    homeassistant.components.websocket_api: fatal
+    custom_components.monitor_docker.helpers: error
+    homeassistant.setup: error
+
+sensor:
+  - platform: time_date
+    display_options:
+      - time
+      - date
