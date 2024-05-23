@@ -1,0 +1,77 @@
+#######################################################################################################################
+## Variables
+#######################################################################################################################
+var:
+  # Radio Player
+  rp_[endpoint]_playing:
+    initial_value: "off"
+    attributes:
+      friendly_name: "[Radio Player] [Endpoint Name]"
+      icon: mdi:radio
+    restore: true
+
+#######################################################################################################################
+## Sensors
+#######################################################################################################################
+
+sensor:
+  - platform: template
+    sensors:
+      [endpoint]_mediadisplay:
+        friendly_name: "[Radio Player] Media Display"
+        unique_id: [endpoint]_mediadisplay
+        value_template: >
+          {% set media=state_attr('media_player.vlc_[endpoint]_kodi_mini', 'media_title') %}
+          {% set mediainfo=state_attr('media_player.vlc_[endpoint]_kodi_mini', 'media_artist') %}
+          {% if not media %} Not Playing {% else %}{{media}}{%endif%}
+#######################################################################################################################
+## Input Boolean
+#######################################################################################################################
+input_boolean:
+  # Radio Player
+  rp_[endpoint]:
+    name: "[Radio Player] [Endpoint Name] - On/Off"
+    icon: mdi:power
+  rp_[endpoint]_sleep:
+    name: "[Radio Player] [Endpoint Name] - Sleep"
+    icon: mdi:bed-clock
+
+#######################################################################################################################
+## Input Number
+#######################################################################################################################
+input_number:
+  # Radio Player
+  rp_[endpoint]_volume:
+    name: "[Radio Player] [Endpoint Name] - Volume"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+
+  rp_[endpoint]_snooze:
+    name: "[Radio Player] [Endpoint Name] - Sleep Duration"
+    icon: mdi:timer-outline
+    min: 1
+    max: 6
+    step: 1
+    unit_of_measurement: "hrs"
+
+#######################################################################################################################
+## Input Select
+#######################################################################################################################
+input_select:
+  # Radio Player
+  rp_[endpoint]_radio:
+    name: "[Radio Player] [Endpoint Name] - Radio Station"
+    icon: mdi:radio-tower
+    options: !include /config/include/media/stations.yaml
+
+#######################################################################################################################
+## Timer
+#######################################################################################################################
+timer:
+  # Radio Player
+  rp_[endpoint]_sleep:
+    name: "[Radio Player] [Endpoint Name] - Sleep"
+    icon: mdi:sleep
