@@ -1,0 +1,19 @@
+type: custom:button-card
+entity: light.[light_entity]
+name: >-
+  [[[
+    if (states['input_boolean.frigate_[camera]_override'].state === 'on') {
+      return `Lights(m)`;
+    } else {
+      return `Lights`;
+    }
+  ]]]
+icon: mdi:light
+show_state: false
+hold_action:
+  action: toggle
+  entity: input_boolean.frigate_[camera]_override
+template:
+  - base
+  - light
+  - icon_light
