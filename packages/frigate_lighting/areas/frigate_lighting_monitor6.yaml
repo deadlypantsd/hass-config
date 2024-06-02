@@ -1,0 +1,286 @@
+#######################################################################################################################
+## Input Boolean
+#######################################################################################################################
+
+input_boolean:
+  # Monitor Override:
+  frigate_[camera_name]_override: #Kitchen
+    name: "[Frigate Lighting] [camera_name] Override"
+    icon: mdi:power
+
+#######################################################################################################################
+## Input Date[Time]
+#######################################################################################################################
+input_datetime:
+  # If dont want to use above/below horizon
+  frigate_lighting_time_on:
+    name: "[Frigate Lighting] Manual Time On"
+    has_date: false
+    has_time: true
+  frigate_lighting_time_off:
+    name: "[Frigate Lighting] Manual Time Off"
+    has_date: false
+    has_time: true
+
+#######################################################################################################################
+## Input Number
+#######################################################################################################################
+input_number:
+  ###
+  ### NIGHT TIME
+  ###
+
+  frigate_[camera_name]_timeon_initpercent:
+    name: "[Frigate Lighting] [camera_name] [Night] Initial Value"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+  frigate_[camera_name]_timeon_runpercent:
+    name: "[Frigate Lighting] [camera_name] [Night] Running Value"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+  frigate_[camera_name]_timeon_duration:
+    name: "[Frigate Lighting] [camera_name] [Night] Occupancy Duration"
+    icon: mdi:none
+    min: "0"
+    max: 30
+    step: 1
+    unit_of_measurement: "sec"
+
+  ###
+  ### DAY TIME
+  ###
+
+  frigate_[camera_name]_timeoff_initpercent:
+    name: "[Frigate Lighting] [camera_name] [Day] Initial Value"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+  frigate_[camera_name]_timeoff_runpercent:
+    name: "[Frigate Lighting] [camera_name] [Day] Running Value"
+    icon: mdi:none
+    min: 1
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+  frigate_[camera_name]_timeoff_duration:
+    name: "[Frigate Lighting] [camera_name] [Day] Occupancy Duration"
+    icon: mdi:none
+    min: "0"
+    max: 30
+    step: 1
+    unit_of_measurement: "sec"
+
+#######################################################################################################################
+## Automation
+#######################################################################################################################
+
+automation:
+  - id: frigate_lighting_[camera_name]_on
+    alias: "[Frigate Lighting] [camera_name] ON"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.[camera_name]_person_occupancy
+        to: "on"
+    condition:
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: input_boolean.frigate_lighting
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.frigate_[camera_name]_override
+            state: "off"
+    action:
+      - if:
+          - condition: state
+            entity_id: input_boolean.frigate_lighting_manual
+            state: "on"
+        then:
+          - if:
+              condition:
+                - condition: time
+                  after: input_datetime.frigate_lighting_time_on
+                  before: input_datetime.frigate_lighting_time_off
+            then:
+              - repeat:
+                  sequence:
+                    - service: light.turn_on
+                      data:
+                        brightness_pct: >
+                          {{ states('input_number.frigate_[camera_name]_timeon_initpercent') }}
+                      target:
+                        entity_id: light.craftroom_lamp
+                  until:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "off"
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "on"
+                          for:
+                            hours: 0
+                            minutes: 0
+                            seconds: >
+                              {{ states('input_number.frigate_[camera_name]_timeon_duration') }}
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.[camera_name]_person_occupancy
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      brightness_pct: >
+                        {{ states('input_number.frigate_[camera_name]_timeon_runpercent') }}
+                    target:
+                      entity_id: light.craftroom_lamp
+            else:
+              - repeat:
+                  sequence:
+                    - service: light.turn_on
+                      data:
+                        brightness_pct: >
+                          {{ states('input_number.frigate_[camera_name]_timeoff_initpercent') }}
+                      target:
+                        entity_id: light.craftroom_lamp
+                  until:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "off"
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "on"
+                          for:
+                            hours: 0
+                            minutes: 0
+                            seconds: >
+                              {{ states('input_number.frigate_[camera_name]_timeoff_duration') }}
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.[camera_name]_person_occupancy
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      brightness_pct: >
+                        {{ states('input_number.frigate_[camera_name]_timeoff_runpercent') }}
+                    target:
+                      entity_id: light.craftroom_lamp
+        else:
+          - if:
+              - condition: state
+                entity_id: sun.sun
+                state: below_horizon
+            then:
+              - repeat:
+                  sequence:
+                    - service: light.turn_on
+                      data:
+                        brightness_pct: >
+                          {{ states('input_number.frigate_[camera_name]_timeon_initpercent') }}
+                      target:
+                        entity_id: light.craftroom_lamp
+                  until:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "off"
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "on"
+                          for:
+                            hours: 0
+                            minutes: 0
+                            seconds: >
+                              {{ states('input_number.frigate_[camera_name]_timeon_duration') }}
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.[camera_name]_person_occupancy
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      brightness_pct: >
+                        {{ states('input_number.frigate_[camera_name]_timeon_runpercent') }}
+                    target:
+                      entity_id: light.craftroom_lamp
+
+            else:
+              - repeat:
+                  sequence:
+                    - service: light.turn_on
+                      data:
+                        brightness_pct: >
+                          {{ states('input_number.frigate_[camera_name]_timeoff_initpercent') }}
+                      target:
+                        entity_id: light.craftroom_lamp
+                  until:
+                    - condition: or
+                      conditions:
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "off"
+                        - condition: state
+                          entity_id: binary_sensor.[camera_name]_person_occupancy
+                          state: "on"
+                          for:
+                            hours: 0
+                            minutes: 0
+                            seconds: >
+                              {{ states('input_number.frigate_[camera_name]_timeoff_duration') }}
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.[camera_name]_person_occupancy
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      brightness_pct: >
+                        {{ states('input_number.frigate_[camera_name]_timeoff_runpercent') }}
+                    target:
+                      entity_id: light.craftroom_lamp
+
+  - id: frigate_lighting_[camera_name]_off
+    alias: "[Frigate Lighting] [camera_name] OFF"
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.[camera_name]_person_occupancy
+        to: "off"
+    condition:
+      - condition:
+          - condition: state
+            entity_id: input_boolean.frigate_[camera_name]_override
+            state: "off"
+
+    action:
+      - service: light.turn_on
+        data:
+          brightness_pct: 1
+        target:
+          entity_id: light.craftroom_lamp
+      # - wait_for_trigger:
+      #     - platform: state
+      #       entity_id:
+      #         - light.craftroom_lamp
+      #       attribute: brightness
+      #       to: 3
+
+      - service: light.turn_off
+        target:
+          entity_id: light.craftroom_lamp

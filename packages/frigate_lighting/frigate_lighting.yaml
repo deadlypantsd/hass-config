@@ -1,0 +1,8 @@
+input_boolean:
+  # Global On/Off
+  frigate_lighting:
+    name: "[Frigate Lighting] Global On/Off"
+    icon: mdi:power
+  # Manual Timing
+  frigate_lighting_manual:
+    name: "[Frigate Lighting] Manual Time On/Off"
