@@ -1,0 +1,223 @@
+type: custom:button-card
+name: [Name]
+template:
+  - base
+tap_action:
+  action: block
+styles:
+  custom_fields:
+    ####
+    ## OPTION 1
+    ####
+
+    label1:
+      - position: absolute
+      - left: -5%
+      - top: 0%
+      - width: 80%
+      - pointer-events: none;
+    option1:
+      - position: absolute
+      - right: -20%
+      - top: -7%
+      - width: 60%
+
+    ####
+    ## OPTION 2
+    ####
+
+    label2:
+      - position: absolute
+      - left: -5%
+      - top: 20%
+      - width: 80%
+      - pointer-events: none;
+    option2:
+      - position: absolute
+      - right: -20%
+      - top: 12%
+      - width: 60%
+
+    ####
+    ## OPTION 3
+    ####
+    
+    label3:
+     - position: absolute
+     - left: -5%
+     - top: 40%
+     - width: 80%
+     - pointer-events: none;
+    option3:
+     - position: absolute
+     - right: -20%
+     - top: 32%
+     - width: 60%
+    ####
+    ## OPTION 4
+    ####
+    
+    label4:
+     - position: absolute
+     - left: -5%
+     - top: 60%
+     - width: 80%
+     - pointer-events: none;
+    option4:
+     - position: absolute
+     - right: -20%
+     - top: 52%
+     - width: 60%
+
+custom_fields:
+  ####
+  ## OPTION 1
+  ####
+
+  label1:
+    card:
+      type: custom:button-card
+      name: Option1
+      show_icon: false
+      styles:
+        name:
+          - justify-self: start
+          - font-size: var(--button-card-font-size);
+          - font-weight: var(--button-card-font-weight);
+          - letter-spacing: var(--button-card-letter-spacing);
+        card:
+          - background-color: transparent
+          - border: none
+          - color: "#97989c"
+      tap_action:
+        action: block
+
+  option1:
+    card:
+      type: custom:button-card
+      entity: 
+      show_name: false
+      state:
+        - icon: mdi:toggle-switch
+          value: "on"
+        - icon: mdi:toggle-switch-off
+          value: "off"
+      styles:
+        card:
+          - background-color: transparent
+          - border: none
+      tap_action:
+        action: toggle
+  ####
+  ## OPTION 2
+  ####
+
+  label2:
+    card:
+      type: custom:button-card
+      name: Option2
+      show_icon: false
+      styles:
+        name:
+          - justify-self: start
+          - font-size: var(--button-card-font-size);
+          - font-weight: var(--button-card-font-weight);
+          - letter-spacing: var(--button-card-letter-spacing);
+        card:
+          - background-color: transparent
+          - border: none
+          - color: "#97989c"
+      tap_action:
+        action: block
+  option2:
+    card:
+      type: custom:button-card
+      entity: 
+      show_name: false
+      state:
+        - icon: mdi:toggle-switch
+          value: "on"
+        - icon: mdi:toggle-switch-off
+          value: "off"
+      styles:
+        card:
+          - background-color: transparent
+          - border: none
+      tap_action:
+        action: toggle
+  ####
+  ## OPTION 3
+  ####
+  
+   label3:
+     card:
+       type: custom:button-card
+       name: Option3
+       show_icon: false
+       styles:
+         name:
+           - justify-self: start
+           - font-size: var(--button-card-font-size);
+           - font-weight: var(--button-card-font-weight);
+           - letter-spacing: var(--button-card-letter-spacing);
+         card:
+           - background-color: transparent
+           - border: none
+           - color: "#97989c"
+       tap_action:
+         action: block
+  
+   option3:
+     card:
+       type: custom:button-card
+       entity: input_boolean.frigate_lighting
+       show_name: false
+       state:
+         - icon: mdi:toggle-switch
+           value: "on"
+         - icon: mdi:toggle-switch-off
+           value: "off"
+       styles:
+         card:
+           - background-color: transparent
+           - border: none
+       tap_action:
+         action: toggle
+  ####
+  ## OPTION 4
+  ####
+  
+   label4:
+     card:
+       type: custom:button-card
+       name: Option4
+       show_icon: false
+       styles:
+         name:
+           - justify-self: start
+           - font-size: var(--button-card-font-size);
+           - font-weight: var(--button-card-font-weight);
+           - letter-spacing: var(--button-card-letter-spacing);
+         card:
+           - background-color: transparent
+           - border: none
+           - color: "#97989c"
+       tap_action:
+         action: block
+  
+   option4:
+     card:
+       type: custom:button-card
+       entity: input_boolean.frigate_lighting
+       show_name: false
+       state:
+         - icon: mdi:toggle-switch
+           value: "on"
+         - icon: mdi:toggle-switch-off
+           value: "off"
+       styles:
+         card:
+           - background-color: transparent
+           - border: none
+       tap_action:
+         action: toggle
